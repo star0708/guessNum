@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulls and Cows Game - Classic Number Guessing Game</title>
+    <meta name="description" content="Play the classic Bulls and Cows number guessing game. Test your logical thinking by guessing a 4-digit number with unique digits.">
+    <link rel="canonical" href="https://yourdomain.com/bulls-and-cows-game" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --apple-blue: #007AFF;
+            --apple-gray: #F5F5F7;
+            --apple-dark: #1D1D1F;
+        }
+        body {
+            background: var(--apple-gray);
+            min-height: 100vh;
+            color: var(--apple-dark);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .input-field {
+            background: white;
+            border: 2px solid #E5E5E5;
+            color: var(--apple-dark);
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 200px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: var(--apple-blue);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+        .guess-history {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 2rem;
+        }
+        .guess-item {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+        .guess-item:hover {
+            transform: translateY(-2px);
+        }
+        .btn-primary {
+            background: var(--apple-blue);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+        .section-title {
+            color: var(--apple-dark);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        .game-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        @media (max-width: 640px) {
+            .game-container {
+                padding: 1rem;
+            }
+            .game-card {
+                padding: 1.5rem;
+            }
+            .input-field {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="text-4xl font-bold text-center mb-8 text-[var(--apple-dark)]">Bulls and Cows Game</h1>
+        
+        <div class="game-card">
+            <h2 class="section-title">Game Rules</h2>
+            <div class="mb-6">
+                <ul class="space-y-3 text-gray-600">
+                    <li>• Guess a 4-digit number with unique digits (0-9)</li>
+                    <li>• Bulls (A): Correct digit in the correct position</li>
+                    <li>• Cows (B): Correct digit in the wrong position</li>
+                    <li>• Example: If the answer is 1234 and you guess 1357, you get 1A1B</li>
+                </ul>
+            </div>
+
+            <h2 class="section-title">Make Your Guess</h2>
+            <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                <input type="text" id="guessInput" class="input-field" placeholder="Enter 4 digits" maxlength="4">
+                <button onclick="submitGuess()" class="btn-primary">
+                    Submit
+                </button>
+            </div>
+
+            <h2 class="section-title">Guess History</h2>
+            <div class="guess-history" id="guessHistory"></div>
+        </div>
+    </div>
+
+    <script>
+        let answer = generateAnswer();
+        let guessCount = 0;
+        const maxGuesses = 10;
+
+        function generateAnswer() {
+            let numbers = [0,1,2,3,4,5,6,7,8,9];
+            let answer = '';
+            for(let i = 0; i < 4; i++) {
+                let randomIndex = Math.floor(Math.random() * numbers.length);
+                answer += numbers[randomIndex];
+                numbers.splice(randomIndex, 1);
+            }
+            return answer;
+        }
+
+        function checkGuess(guess) {
+            let a = 0, b = 0;
+            for(let i = 0; i < 4; i++) {
+                if(guess[i] === answer[i]) {
+                    a++;
+                } else if(answer.includes(guess[i])) {
+                    b++;
+                }
+            }
+            return {a, b};
+        }
+
+        function submitGuess() {
+            const input = document.getElementById('guessInput');
+            const guess = input.value;
+            
+            if(guess.length !== 4) {
+                alert('Please enter 4 digits!');
+                return;
+            }
+            
+            if(!/^\d+$/.test(guess)) {
+                alert('Please enter numbers only!');
+                return;
+            }
+            
+            if(new Set(guess).size !== 4) {
+                alert('Digits cannot be repeated!');
+                return;
+            }
+
+            guessCount++;
+            const result = checkGuess(guess);
+            const history = document.getElementById('guessHistory');
+            
+            const guessItem = document.createElement('div');
+            guessItem.className = 'guess-item';
+            guessItem.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-700">Guess #${guessCount}: ${guess}</span>
+                    <span class="font-bold text-[var(--apple-blue)]">${result.a}A${result.b}B</span>
+                </div>
+            `;
+            
+            history.insertBefore(guessItem, history.firstChild);
+            input.value = '';
+
+            if(result.a === 4) {
+                alert(`Congratulations! The answer is ${answer}`);
+                location.reload();
+            } else if(guessCount >= maxGuesses) {
+                alert(`Game Over! The correct answer was ${answer}`);
+                location.reload();
+            }
+        }
+
+        // Add enter key support
+        document.getElementById('guessInput').addEventListener('keypress', function(e) {
+            if(e.key === 'Enter') {
+                submitGuess();
+            }
+        });
+    </script>
+</body>
+</html> 
